@@ -1,57 +1,33 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TISSCA</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 40px 18px;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: #0b0c10;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-    }
-    .card {
-      max-width: 720px;
-      width: 100%;
-      padding: 26px;
-      border-radius: 22px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-    }
-    h1 { margin: 0 0 12px; font-size: 34px; letter-spacing: 0.5px; }
-    p { margin: 0 0 14px; line-height: 1.6; color: rgba(255,255,255,0.85); }
-    .small { margin-top: 18px; font-size: 12px; opacity: 0.75; }
-    code { background: rgba(255,255,255,0.10); padding: 2px 6px; border-radius: 8px; }
-    a.btn {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 12px 16px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.14);
-      border: 1px solid rgba(255,255,255,0.20);
-      color: #fff;
-      font-weight: 650;
-      text-decoration: none;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>TISSCA</h1>
-    <p>We’re building the TISSCA platform.</p>
-    <p>If you received an invite link, it will look like:</p>
-    <p><code>https://tissca.com/invite/&lt;inviteId&gt;</code></p>
-
-    <a class="btn" href="/invite/">Open invite page</a>
-
-    <div class="small">
-      This is a temporary site while we finish the full website.
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TISSCA</title>
+    <style>
+      body { font-family: Arial, Helvetica, sans-serif; margin: 0; background: #f5f7fb; }
+      .wrap { max-width: 720px; margin: 0 auto; padding: 48px 18px; }
+      .card { background: #fff; border-radius: 16px; padding: 26px; box-shadow: 0 10px 30px rgba(16,24,40,.08); }
+      a.btn { display: inline-block; background: #1f4bff; color: #fff; text-decoration: none; padding: 12px 16px; border-radius: 12px; font-weight: 700; }
+      .muted { color: #667085; margin-top: 10px; line-height: 1.4; }
+      .code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono"; background: #eef2ff; padding: 2px 6px; border-radius: 8px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1 style="margin:0 0 10px 0;">TISSCA</h1>
+        <p class="muted" style="margin:0 0 18px 0;">
+          If you opened an invite link on a phone and the app didn’t open, install the app and try again.
+        </p>
+        <p style="margin:0 0 18px 0;">
+          Invite links look like: <span class="code">https://tissca.com/invite/&lt;inviteId&gt;</span>
+        </p>
+        <a class="btn" href="https://play.google.com/store" target="_blank" rel="noopener">Get the app</a>
+        <p class="muted">
+          (This page is temporary while we finish the full website.)
+        </p>
+      </div>
     </div>
-  </div>
-</body>
+  </body>
 </html>
