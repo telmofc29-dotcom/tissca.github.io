@@ -3,74 +3,158 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <meta name="format-detection" content="telephone=no,address=no,email=no" />
   <title>TISSCA — Email Verified</title>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background:#1b1412; color:#f4eee9; }
-    .card { max-width: 520px; margin: 10vh auto; background:#2a1f1b; border-radius: 18px; padding: 28px; }
-    h1 { margin: 0 0 10px; font-size: 28px; }
-    p { margin: 10px 0; opacity: .9; line-height: 1.5; }
-    .btn { margin-top: 18px; display:inline-block; padding: 12px 16px; border-radius: 999px; background:#ffb38f; color:#2a1f1b; text-decoration:none; font-weight: 600; }
-    .muted { opacity:.75; font-size: 13px; margin-top: 14px; word-break: break-all; }
+    :root{
+      --bg:#1b1412; --card:#2a1f1b; --muted:rgba(244,238,233,.78); --text:#f4eee9;
+      --btn:#ffb38f; --btnText:#2a1f1b; --border:rgba(255,255,255,.16); --danger:#ffb4b4;
+    }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);color:var(--text);}
+    .wrap{padding:22px;}
+    .card{max-width:560px;margin:10vh auto;background:var(--card);border-radius:18px;padding:26px;border:1px solid rgba(255,255,255,.08);}
+    h1{margin:0 0 10px;font-size:28px;letter-spacing:-0.2px;}
+    p{margin:10px 0;line-height:1.55;color:var(--muted);}
+    .row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+    a.btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:12px 16px;border-radius:999px;background:var(--btn);color:var(--btnText);
+      text-decoration:none;font-weight:750;letter-spacing:.2px;min-width:220px;
+    }
+    a.secondary{
+      background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.12);min-width:220px;
+    }
+    .err{margin-top:12px;color:var(--danger);font-size:13px;line-height:1.45;display:none;}
+    .debug{display:none;margin-top:12px;font-size:12px;color:rgba(255,255,255,.55);word-break:break-all;}
+    .footer{margin-top:14px;font-size:12px;color:rgba(255,255,255,.55);}
   </style>
 </head>
+
 <body>
-  <div class="card">
-    <h1 id="title">Verifying…</h1>
-    <p id="msg">Please wait.</p>
-    <a id="openApp" class="btn" href="tissca://auth/callback" style="display:none;">Open the app</a>
-    <div id="debug" class="muted"></div>
+  <div class="wrap">
+    <div class="card">
+      <h1 id="title">Verifying…</h1>
+      <p id="msg">Please wait while we confirm your email.</p>
+
+      <div class="row" id="actions" style="display:none;">
+        <a id="openApp" class="btn" href="tissca://auth/callback">Open the app</a>
+        <a id="goWeb" class="btn secondary" href="https://tissca.com">Continue on web</a>
+      </div>
+
+      <div id="err" class="err"></div>
+      <div id="debug" class="debug"></div>
+
+      <div class="footer">TISSCA — secure account verification</div>
+    </div>
   </div>
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+    // ===============================================================
+    // ✅ CONFIG (ONE PLACE ONLY — NO DUPLICATES)
+    // Supabase Dashboard → Project Settings → API
+    // Copy: "anon public" key
+    // ===============================================================
     const SUPABASE_URL = "https://ovkpblbnnvnmsulrrnor.supabase.co";
-    const SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY_HERE";
+    const SUPABASE_ANON_KEY = "sb_publishable_hHm8j6LDzX02VYbayMaZZw_8n_E901Y"; // <-- paste your anon key here
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const title = document.getElementById("title");
     const msg = document.getElementById("msg");
-    const openApp = document.getElementById("openApp");
+    const actions = document.getElementById("actions");
+    const errBox = document.getElementById("err");
     const debug = document.getElementById("debug");
 
-    function showOk(text) {
-      title.textContent = "Email verified";
-      msg.textContent = text;
-      openApp.style.display = "inline-block";
-    }
-    function showErr(text) {
+    function setError(text, showDebug = false) {
       title.textContent = "Verification failed";
-      msg.textContent = text;
-      debug.textContent = window.location.href;
+      msg.textContent = "We couldn’t confirm your email.";
+      errBox.style.display = "block";
+      errBox.textContent = text;
+
+      if (showDebug) {
+        debug.style.display = "block";
+        debug.textContent = window.location.href;
+      }
     }
 
-    const url = new URL(window.location.href);
-    const code = url.searchParams.get("code");
-    const token_hash = url.searchParams.get("token_hash");
-    const type = url.searchParams.get("type");
+    function setSuccess() {
+      title.textContent = "Email verified";
+      msg.textContent = "Thank you — your email has been verified. You can now return to the app and sign in.";
+      actions.style.display = "flex";
+    }
 
-    try {
-      // Newer Supabase links often use `code`
-      if (code) {
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    // Supabase links may arrive as:
+    // - ?code=...
+    // - ?token_hash=...&type=signup
+    // - #access_token=...&refresh_token=...&type=signup
+    function parseParams() {
+      const url = new URL(window.location.href);
+      const q = url.searchParams;
+
+      const hash = (window.location.hash || "").replace(/^#/, "");
+      const h = new URLSearchParams(hash);
+
+      return {
+        code: q.get("code") || null,
+        token_hash: q.get("token_hash") || null,
+        type: q.get("type") || null,
+
+        access_token: h.get("access_token") || null,
+        refresh_token: h.get("refresh_token") || null,
+        hash_type: h.get("type") || null,
+      };
+    }
+
+    async function establishSessionFromLink(p) {
+      // 1) Newer flow: ?code=
+      if (p.code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(p.code);
         if (error) throw error;
-        showOk("Thanks — your email has been verified. You can now return to the app and sign in.");
         return;
       }
 
-      // Older links use token_hash + type
-      if (token_hash && type) {
-        const { data, error } = await supabase.auth.verifyOtp({ token_hash, type });
+      // 2) token_hash + type (signup/verify)
+      if (p.token_hash) {
+        const t = p.type || "signup";
+        const { error } = await supabase.auth.verifyOtp({ token_hash: p.token_hash, type: t });
         if (error) throw error;
-        showOk("Thanks — your email has been verified. You can now return to the app and sign in.");
         return;
       }
 
-      showErr("Missing verification parameters in the link.");
-    } catch (e) {
-      showErr(e?.message || "Unknown error.");
+      // 3) Hash fragment tokens (implicit)
+      if (p.access_token && p.refresh_token) {
+        const { error } = await supabase.auth.setSession({
+          access_token: p.access_token,
+          refresh_token: p.refresh_token,
+        });
+        if (error) throw error;
+        return;
+      }
+
+      throw new Error("Missing verification parameters in the link.");
     }
+
+    (async () => {
+      try {
+        if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY === "__SUPABASE_ANON_KEY__") {
+          title.textContent = "Setup needed";
+          msg.textContent = "This page is missing the Supabase anon key.";
+          setError("Add your Supabase anon public key in this file (Project Settings → API).", true);
+          return;
+        }
+
+        const p = parseParams();
+        await establishSessionFromLink(p);
+
+        // If we got here, verification succeeded.
+        setSuccess();
+      } catch (e) {
+        setError(e?.message || "Unknown error.", true);
+      }
+    })();
   </script>
 </body>
 </html>
