@@ -8,142 +8,322 @@
   <title>TISSCA — Invitation</title>
 
   <style>
-    :root {
-      --bg: #1b1412;
-      --card: #2a1f1b;
-      --text: #f4eee9;
-      --muted: rgba(244,238,233,.75);
-      --accent: #ffb38f;
-      --accentText: #2a1f1b;
-      --border: rgba(255,255,255,.08);
+    :root{
+      --bg:#1b1412;
+      --card:#2a1f1b;
+      --text:#f4eee9;
+      --muted:rgba(244,238,233,.75);
+      --accent1:#ffb38f;
+      --accent2:#ff9f73;
+      --accentText:#2a1f1b;
+      --border:rgba(255,255,255,.10);
+      --borderSoft:rgba(255,255,255,.08);
     }
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: var(--bg);
-      color: var(--text);
-      -webkit-font-smoothing: antialiased;
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      overflow-x:hidden;
     }
 
-    .wrap {
-      padding: 24px;
+    /* ============================================================
+       1) SUBTLE AMBIENT BACKGROUND ANIMATION (breathing radial)
+       ============================================================ */
+    .ambient{
+      position:fixed;
+      inset:-20%;
+      z-index:-3;
+      background:
+        radial-gradient(900px 700px at 30% 25%, rgba(255,179,143,.18), transparent 60%),
+        radial-gradient(900px 700px at 70% 65%, rgba(255,159,115,.12), transparent 60%),
+        radial-gradient(1200px 900px at 55% 45%, rgba(255,255,255,.05), transparent 70%);
+      filter: blur(18px);
+      animation: ambientFloat 14s ease-in-out infinite;
+      transform: translate3d(0,0,0);
+      opacity: .9;
+    }
+    @keyframes ambientFloat{
+      0%   { transform: translate3d(-2%, -1%, 0) scale(1);   }
+      50%  { transform: translate3d( 2%,  1%, 0) scale(1.03);}
+      100% { transform: translate3d(-2%, -1%, 0) scale(1);   }
     }
 
-    .card {
-      max-width: 600px;
-      margin: 12vh auto;
-      background: var(--card);
-      border-radius: 22px;
-      padding: 36px;
-      border: 1px solid var(--border);
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
-      backdrop-filter: blur(8px);
+    /* ============================================================
+       3) SOFT NOISE TEXTURE OVERLAY (pure CSS)
+       (No external assets, works on GitHub Pages)
+       ============================================================ */
+    .noise{
+      position:fixed;
+      inset:0;
+      z-index:-2;
+      pointer-events:none;
+      opacity:.06;
+      mix-blend-mode:overlay;
+      background-image:
+        repeating-radial-gradient(circle at 20% 20%,
+          rgba(255,255,255,.08) 0 1px, transparent 1px 3px),
+        repeating-radial-gradient(circle at 80% 70%,
+          rgba(0,0,0,.10) 0 1px, transparent 1px 4px);
+      animation: noiseShift 7s steps(6) infinite;
+      transform: translate3d(0,0,0);
+    }
+    @keyframes noiseShift{
+      0%   { transform: translate3d(0,0,0); }
+      20%  { transform: translate3d(-2%,1%,0); }
+      40%  { transform: translate3d(1%,-2%,0); }
+      60%  { transform: translate3d(2%,2%,0); }
+      80%  { transform: translate3d(-1%,-1%,0); }
+      100% { transform: translate3d(0,0,0); }
     }
 
-    h1 {
-      margin: 0 0 12px 0;
-      font-size: 30px;
-      letter-spacing: -0.4px;
+    .wrap{padding:24px}
+    .card{
+      max-width:640px;
+      margin:12vh auto;
+      background:rgba(42,31,27,.86);
+      border-radius:26px;
+      padding:38px;
+      border:1px solid var(--borderSoft);
+      box-shadow:0 26px 70px rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
     }
 
-    p {
-      margin: 12px 0;
-      line-height: 1.6;
-      color: var(--muted);
-      font-size: 15px;
+    h1{
+      margin:0 0 12px 0;
+      font-size:32px;
+      letter-spacing:-0.55px;
     }
 
-    .code {
-      display: inline-block;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas;
+    p{
+      margin:12px 0;
+      line-height:1.65;
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .code{
+      display:inline-block;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      padding:8px 12px;
+      border-radius:12px;
+      margin-top:6px;
+      font-size:13px;
+      color:var(--text);
+      max-width:100%;
+      overflow:auto;
+      white-space:nowrap;
+    }
+
+    .row{
+      margin-top:26px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    /* ============================================================
+       PREMIUM BUTTON SYSTEM + 2) EDGE SHIMMER SWEEP ANIMATION
+       ============================================================ */
+    a.btn{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:14px 22px;
+      border-radius:999px;
+      background: linear-gradient(145deg, var(--accent1), var(--accent2));
+      color:var(--accentText);
+      font-weight:850;
+      text-decoration:none;
+      letter-spacing:.25px;
+      min-width:220px;
+      transition: all .25s cubic-bezier(.22,1,.36,1);
+      box-shadow:
+        0 8px 22px rgba(255,179,143,.22),
+        inset 0 1px 0 rgba(255,255,255,.35);
+      overflow:hidden;
+      transform: translate3d(0,0,0);
+    }
+
+    /* Ambient glow */
+    a.btn::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius:999px;
+      background: radial-gradient(circle at 50% 50%, rgba(255,179,143,.45), transparent 70%);
+      opacity:0;
+      transition: opacity .35s ease;
+    }
+
+    /* Shimmer sweep */
+    a.btn::after{
+      content:"";
+      position:absolute;
+      top:-40%;
+      left:-60%;
+      width:60%;
+      height:180%;
+      background: linear-gradient(120deg,
+        transparent 0%,
+        rgba(255,255,255,.28) 30%,
+        rgba(255,255,255,.10) 45%,
+        transparent 70%);
+      transform: rotate(16deg);
+      opacity:.55;
+      animation: shimmer 3.8s ease-in-out infinite;
+      pointer-events:none;
+      mix-blend-mode: soft-light;
+    }
+
+    @keyframes shimmer{
+      0%   { left:-60%; opacity:.10; }
+      35%  { opacity:.55; }
+      60%  { opacity:.25; }
+      100% { left:120%; opacity:.10; }
+    }
+
+    a.btn:hover{
+      transform: translateY(-4px);
+      box-shadow:
+        0 14px 46px rgba(255,179,143,.42),
+        inset 0 1px 0 rgba(255,255,255,.38);
+    }
+    a.btn:hover::before{opacity:1}
+
+    a.btn:active{
+      transform: translateY(0);
+      box-shadow:
+        0 6px 16px rgba(255,179,143,.22),
+        inset 0 2px 6px rgba(0,0,0,.22);
+    }
+
+    a.secondary{
       background: rgba(255,255,255,.06);
-      padding: 6px 10px;
-      border-radius: 10px;
-      margin-top: 6px;
-      font-size: 13px;
+      border: 1px solid rgba(255,255,255,.16);
       color: var(--text);
+      box-shadow: none;
+    }
+    a.secondary::after{
+      opacity:.25;
+      animation-duration: 5.2s;
+    }
+    a.secondary:hover{
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,.28);
+      box-shadow: 0 14px 42px rgba(0,0,0,.42);
     }
 
-    .row {
-      margin-top: 26px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
+    .meta{
+      margin-top:18px;
+      font-size:12px;
+      color:rgba(255,255,255,.52);
     }
 
-    a.btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 14px 20px;
-      border-radius: 999px;
-      background: var(--accent);
-      color: var(--accentText);
-      font-weight: 700;
-      text-decoration: none;
-      letter-spacing: .2px;
-      min-width: 200px;
-      transition: transform .15s ease, box-shadow .15s ease;
+    @media (max-width: 600px){
+      .card{padding:28px}
+      a.btn{min-width: 100%}
     }
 
-    a.btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(255,179,143,.35);
-    }
-
-    a.secondary {
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,.12);
-    }
-
-    .footer {
-      margin-top: 24px;
-      font-size: 12px;
-      color: rgba(255,255,255,.5);
-    }
-
-    @media (max-width: 600px) {
-      .card {
-        padding: 28px;
-      }
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .ambient,.noise,a.btn::after{animation:none}
+      a.btn{transition:none}
     }
   </style>
 </head>
 
 <body>
+  <div class="ambient"></div>
+  <div class="noise"></div>
+
   <div class="wrap">
     <div class="card">
-      <h1>You're invited to TISSCA</h1>
+      <h1>You’re invited to TISSCA</h1>
 
-      <p>
-        If you opened an invitation link on your phone and the app didn’t launch automatically,
-        please install the app and then open the link again.
+      <p id="desc">
+        We’re opening your invitation. If the app doesn’t launch automatically, you can install it below and try again.
       </p>
 
       <p>
         Invitation links look like:
+        <span class="code" id="example">https://tissca.com/invite/&lt;inviteId&gt;</span>
       </p>
 
-      <div class="code">
-        https://tissca.com/invite/&lt;inviteId&gt;
-      </div>
-
       <div class="row">
-        <a class="btn" href="https://play.google.com/store" target="_blank" rel="noopener">
-          Download for Android
+        <a class="btn" id="primaryCta" href="https://tissca.com" rel="noopener">
+          Continue
         </a>
 
-        <a class="btn secondary" href="https://tissca.com">
+        <a class="btn secondary" id="secondaryCta" href="https://tissca.com" rel="noopener">
           Visit website
         </a>
       </div>
 
-      <div class="footer">
+      <div class="meta" id="meta">
         TISSCA — Professional workspace management for modern teams.
       </div>
     </div>
   </div>
+
+  <script>
+    // ===============================================================
+    // 4) SMART DEVICE DETECTION + AUTO-SWITCH CTA
+    // - Android → Play Store
+    // - iOS → App Store
+    // - Desktop → Web
+    //
+    // NOTE: Replace APP_STORE_URL once you have it.
+    // ===============================================================
+    const PLAY_STORE_URL = "https://play.google.com/store";
+    const APP_STORE_URL  = "https://apps.apple.com/"; // TODO: replace with your real App Store listing URL
+    const WEB_URL        = "https://tissca.com";
+
+    const ua = navigator.userAgent || "";
+    const isAndroid = /Android/i.test(ua);
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+    const primary = document.getElementById("primaryCta");
+    const secondary = document.getElementById("secondaryCta");
+    const desc = document.getElementById("desc");
+
+    // Try to open the app via deep link if this page is opened on mobile.
+    // If app isn't installed, user can tap the store CTA.
+    const deepLink = "tissca://auth/callback";
+
+    if (isAndroid) {
+      primary.textContent = "Download for Android";
+      primary.href = PLAY_STORE_URL;
+
+      secondary.textContent = "Open the app";
+      secondary.href = deepLink;
+
+      desc.textContent = "If the app doesn’t launch automatically, install it below — then open the invitation link again.";
+    } else if (isIOS) {
+      primary.textContent = "Download for iPhone";
+      primary.href = APP_STORE_URL;
+
+      secondary.textContent = "Open the app";
+      secondary.href = deepLink;
+
+      desc.textContent = "If the app doesn’t launch automatically, install it below — then open the invitation link again.";
+    } else {
+      // Desktop / unknown
+      primary.textContent = "Continue on web";
+      primary.href = WEB_URL;
+
+      secondary.textContent = "Get the app";
+      secondary.href = PLAY_STORE_URL;
+
+      desc.textContent = "If you opened an invite link on a phone and the app didn’t launch automatically, install the app and try again.";
+    }
+  </script>
 </body>
 </html>
