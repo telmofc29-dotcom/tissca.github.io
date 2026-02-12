@@ -9,15 +9,30 @@
 
   <style>
     :root{
-      --bg:#1b1412;
-      --card:#2a1f1b;
-      --text:#f4eee9;
-      --muted:rgba(244,238,233,.75);
-      --accent1:#ffb38f;
-      --accent2:#ff9f73;
-      --accentText:#2a1f1b;
-      --border:rgba(255,255,255,.10);
-      --borderSoft:rgba(255,255,255,.08);
+      /* ============================================================
+         $200M STYLE — Variant A (Neutral Slate)
+         LOCKED: use Android Dark neutrals exactly (Theme.kt)
+         bg      #0B0D12
+         card    #0F1219
+         variant #1A2030
+         outline #2A3142
+         text    #E9ECF3
+         muted   #B9C0D1
+         ============================================================ */
+      --bg:#0B0D12;
+      --card:#0F1219;
+      --variant:#1A2030;
+      --outline:#2A3142;
+      --text:#E9ECF3;
+      --muted:rgba(185,192,209,.82);
+
+      /* “Accent” stays neutral (derived from variant/outline only) */
+      --accent1:#1A2030;
+      --accent2:#2A3142;
+      --accentText:#E9ECF3;
+
+      --border:rgba(233,236,243,.10);
+      --borderSoft:rgba(233,236,243,.08);
     }
 
     html,body{height:100%}
@@ -30,44 +45,45 @@
       overflow-x:hidden;
     }
 
-    /* ============================================================
-       1) SUBTLE AMBIENT BACKGROUND ANIMATION (breathing radial)
-       ============================================================ */
+    /* 1) Ambient breathing background (subtle, expensive) */
     .ambient{
       position:fixed;
       inset:-20%;
       z-index:-3;
       background:
-        radial-gradient(900px 700px at 30% 25%, rgba(255,179,143,.18), transparent 60%),
-        radial-gradient(900px 700px at 70% 65%, rgba(255,159,115,.12), transparent 60%),
-        radial-gradient(1200px 900px at 55% 45%, rgba(255,255,255,.05), transparent 70%);
+        radial-gradient(900px 700px at 28% 22%, rgba(26,32,48,.55), transparent 62%),
+        radial-gradient(900px 700px at 72% 68%, rgba(42,49,66,.38), transparent 62%),
+        radial-gradient(1200px 900px at 55% 45%, rgba(233,236,243,.06), transparent 72%);
       filter: blur(18px);
-      animation: ambientFloat 14s ease-in-out infinite;
+      animation: ambientFloat 16s ease-in-out infinite;
       transform: translate3d(0,0,0);
-      opacity: .9;
+      opacity:.9;
     }
     @keyframes ambientFloat{
-      0%   { transform: translate3d(-2%, -1%, 0) scale(1);   }
-      50%  { transform: translate3d( 2%,  1%, 0) scale(1.03);}
-      100% { transform: translate3d(-2%, -1%, 0) scale(1);   }
+      0%   { transform: translate3d(-2%, -1%, 0) scale(1); }
+      50%  { transform: translate3d( 2%,  1%, 0) scale(1.03); }
+      100% { transform: translate3d(-2%, -1%, 0) scale(1); }
     }
 
-    /* ============================================================
-       3) SOFT NOISE TEXTURE OVERLAY (pure CSS)
-       (No external assets, works on GitHub Pages)
-       ============================================================ */
+    /* 3) Film-grain noise overlay (still pure CSS, less “patterny”) */
     .noise{
       position:fixed;
       inset:0;
       z-index:-2;
       pointer-events:none;
-      opacity:.06;
+      opacity:.055;
       mix-blend-mode:overlay;
       background-image:
-        repeating-radial-gradient(circle at 20% 20%,
-          rgba(255,255,255,.08) 0 1px, transparent 1px 3px),
-        repeating-radial-gradient(circle at 80% 70%,
-          rgba(0,0,0,.10) 0 1px, transparent 1px 4px);
+        repeating-linear-gradient(0deg,
+          rgba(255,255,255,.035) 0px,
+          rgba(255,255,255,.035) 1px,
+          transparent 2px,
+          transparent 4px),
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,.05) 0px,
+          rgba(0,0,0,.05) 1px,
+          transparent 2px,
+          transparent 5px);
       animation: noiseShift 7s steps(6) infinite;
       transform: translate3d(0,0,0);
     }
@@ -82,25 +98,28 @@
 
     .wrap{padding:24px}
     .card{
-      max-width:640px;
+      max-width:680px;
       margin:12vh auto;
-      background:rgba(42,31,27,.86);
-      border-radius:26px;
-      padding:38px;
+      background: rgba(15,18,25,.86);
+      border-radius:28px;
+      padding:40px;
       border:1px solid var(--borderSoft);
-      box-shadow:0 26px 70px rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
+      box-shadow:
+        0 28px 80px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(233,236,243,.06);
+      backdrop-filter: blur(12px);
     }
 
     h1{
       margin:0 0 12px 0;
-      font-size:32px;
-      letter-spacing:-0.55px;
+      font-size:34px;
+      letter-spacing:-0.65px;
+      line-height:1.1;
     }
 
     p{
       margin:12px 0;
-      line-height:1.65;
+      line-height:1.7;
       color:var(--muted);
       font-size:15px;
     }
@@ -108,11 +127,11 @@
     .code{
       display:inline-block;
       font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      padding:8px 12px;
-      border-radius:12px;
-      margin-top:6px;
+      background: rgba(26,32,48,.55);
+      border:1px solid rgba(233,236,243,.10);
+      padding:9px 12px;
+      border-radius:14px;
+      margin-top:8px;
       font-size:13px;
       color:var(--text);
       max-width:100%;
@@ -128,9 +147,7 @@
       align-items:center;
     }
 
-    /* ============================================================
-       PREMIUM BUTTON SYSTEM + 2) EDGE SHIMMER SWEEP ANIMATION
-       ============================================================ */
+    /* $200M Buttons: restrained, carved, not loud */
     a.btn{
       position:relative;
       display:inline-flex;
@@ -138,32 +155,22 @@
       justify-content:center;
       padding:14px 22px;
       border-radius:999px;
-      background: linear-gradient(145deg, var(--accent1), var(--accent2));
-      color:var(--accentText);
+      background: rgba(26,32,48,.88);
+      color: var(--text);
       font-weight:850;
       text-decoration:none;
-      letter-spacing:.25px;
-      min-width:220px;
-      transition: all .25s cubic-bezier(.22,1,.36,1);
+      letter-spacing:.2px;
+      min-width:240px;
+      transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s ease, border-color .22s ease;
+      border: 1px solid rgba(233,236,243,.12);
       box-shadow:
-        0 8px 22px rgba(255,179,143,.22),
-        inset 0 1px 0 rgba(255,255,255,.35);
+        0 10px 26px rgba(0,0,0,.38),
+        inset 0 1px 0 rgba(233,236,243,.07);
       overflow:hidden;
       transform: translate3d(0,0,0);
     }
 
-    /* Ambient glow */
-    a.btn::before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      border-radius:999px;
-      background: radial-gradient(circle at 50% 50%, rgba(255,179,143,.45), transparent 70%);
-      opacity:0;
-      transition: opacity .35s ease;
-    }
-
-    /* Shimmer sweep */
+    /* Micro sheen (slow — “expensive”) */
     a.btn::after{
       content:"";
       position:absolute;
@@ -173,58 +180,51 @@
       height:180%;
       background: linear-gradient(120deg,
         transparent 0%,
-        rgba(255,255,255,.28) 30%,
-        rgba(255,255,255,.10) 45%,
+        rgba(233,236,243,.14) 28%,
+        rgba(233,236,243,.06) 42%,
         transparent 70%);
       transform: rotate(16deg);
-      opacity:.55;
-      animation: shimmer 3.8s ease-in-out infinite;
+      opacity:.35;
+      animation: sheen 6.4s ease-in-out infinite;
       pointer-events:none;
       mix-blend-mode: soft-light;
     }
-
-    @keyframes shimmer{
+    @keyframes sheen{
       0%   { left:-60%; opacity:.10; }
-      35%  { opacity:.55; }
-      60%  { opacity:.25; }
+      30%  { opacity:.38; }
+      55%  { opacity:.18; }
       100% { left:120%; opacity:.10; }
     }
 
     a.btn:hover{
-      transform: translateY(-4px);
+      transform: translateY(-2px);
+      border-color: rgba(233,236,243,.20);
       box-shadow:
-        0 14px 46px rgba(255,179,143,.42),
-        inset 0 1px 0 rgba(255,255,255,.38);
+        0 16px 46px rgba(0,0,0,.48),
+        inset 0 1px 0 rgba(233,236,243,.08);
     }
-    a.btn:hover::before{opacity:1}
-
     a.btn:active{
       transform: translateY(0);
       box-shadow:
-        0 6px 16px rgba(255,179,143,.22),
-        inset 0 2px 6px rgba(0,0,0,.22);
+        0 10px 28px rgba(0,0,0,.42),
+        inset 0 2px 6px rgba(0,0,0,.28);
+    }
+
+    a.primary{
+      background: linear-gradient(160deg, rgba(26,32,48,.92), rgba(42,49,66,.84));
+      border-color: rgba(233,236,243,.14);
     }
 
     a.secondary{
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.16);
-      color: var(--text);
-      box-shadow: none;
+      background: rgba(15,18,25,.55);
+      border-color: rgba(233,236,243,.10);
     }
-    a.secondary::after{
-      opacity:.25;
-      animation-duration: 5.2s;
-    }
-    a.secondary:hover{
-      transform: translateY(-4px);
-      border-color: rgba(255,255,255,.28);
-      box-shadow: 0 14px 42px rgba(0,0,0,.42);
-    }
+    a.secondary::after{ opacity:.22; animation-duration: 7.2s; }
 
     .meta{
       margin-top:18px;
       font-size:12px;
-      color:rgba(255,255,255,.52);
+      color:rgba(185,192,209,.72);
     }
 
     @media (max-width: 600px){
@@ -232,7 +232,6 @@
       a.btn{min-width: 100%}
     }
 
-    /* Respect reduced motion */
     @media (prefers-reduced-motion: reduce){
       .ambient,.noise,a.btn::after{animation:none}
       a.btn{transition:none}
@@ -258,7 +257,7 @@
       </p>
 
       <div class="row">
-        <a class="btn" id="primaryCta" href="https://tissca.com" rel="noopener">
+        <a class="btn primary" id="primaryCta" href="https://tissca.com" rel="noopener">
           Continue
         </a>
 
@@ -274,16 +273,8 @@
   </div>
 
   <script>
-    // ===============================================================
-    // 4) SMART DEVICE DETECTION + AUTO-SWITCH CTA
-    // - Android → Play Store
-    // - iOS → App Store
-    // - Desktop → Web
-    //
-    // NOTE: Replace APP_STORE_URL once you have it.
-    // ===============================================================
     const PLAY_STORE_URL = "https://play.google.com/store";
-    const APP_STORE_URL  = "https://apps.apple.com/"; // TODO: replace with your real App Store listing URL
+    const APP_STORE_URL  = "https://apps.apple.com/";
     const WEB_URL        = "https://tissca.com";
 
     const ua = navigator.userAgent || "";
@@ -294,8 +285,6 @@
     const secondary = document.getElementById("secondaryCta");
     const desc = document.getElementById("desc");
 
-    // Try to open the app via deep link if this page is opened on mobile.
-    // If app isn't installed, user can tap the store CTA.
     const deepLink = "tissca://auth/callback";
 
     if (isAndroid) {
@@ -315,7 +304,6 @@
 
       desc.textContent = "If the app doesn’t launch automatically, install it below — then open the invitation link again.";
     } else {
-      // Desktop / unknown
       primary.textContent = "Continue on web";
       primary.href = WEB_URL;
 
