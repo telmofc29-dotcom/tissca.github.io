@@ -9,16 +9,6 @@
 
   <style>
     :root{
-      /* ============================================================
-         $200M STYLE — Variant A (Neutral Slate)
-         LOCKED: use Android Dark neutrals exactly (Theme.kt)
-         bg      #0B0D12
-         card    #0F1219
-         variant #1A2030
-         outline #2A3142
-         text    #E9ECF3
-         muted   #B9C0D1
-         ============================================================ */
       --bg:#0B0D12;
       --card:#0F1219;
       --variant:#1A2030;
@@ -26,10 +16,9 @@
       --text:#E9ECF3;
       --muted:rgba(185,192,209,.82);
 
-      /* “Accent” stays neutral (derived from variant/outline only) */
-      --accent1:#1A2030;
-      --accent2:#2A3142;
-      --accentText:#E9ECF3;
+      /* Brand tokens from your Color.kt */
+      --purple80:#D0BCFF;
+      --purple40:#6650A4;
 
       --border:rgba(233,236,243,.10);
       --borderSoft:rgba(233,236,243,.08);
@@ -45,15 +34,15 @@
       overflow-x:hidden;
     }
 
-    /* 1) Ambient breathing background (subtle, expensive) */
     .ambient{
       position:fixed;
       inset:-20%;
       z-index:-3;
       background:
-        radial-gradient(900px 700px at 28% 22%, rgba(26,32,48,.55), transparent 62%),
-        radial-gradient(900px 700px at 72% 68%, rgba(42,49,66,.38), transparent 62%),
-        radial-gradient(1200px 900px at 55% 45%, rgba(233,236,243,.06), transparent 72%);
+        radial-gradient(900px 700px at 28% 22%, rgba(26,32,48,.52), transparent 62%),
+        radial-gradient(900px 700px at 72% 68%, rgba(42,49,66,.36), transparent 62%),
+        radial-gradient(1200px 900px at 55% 45%, rgba(233,236,243,.06), transparent 72%),
+        radial-gradient(900px 700px at 55% 38%, rgba(208,188,255,.10), transparent 65%); /* micro purple */
       filter: blur(18px);
       animation: ambientFloat 16s ease-in-out infinite;
       transform: translate3d(0,0,0);
@@ -65,7 +54,6 @@
       100% { transform: translate3d(-2%, -1%, 0) scale(1); }
     }
 
-    /* 3) Film-grain noise overlay (still pure CSS, less “patterny”) */
     .noise{
       position:fixed;
       inset:0;
@@ -147,7 +135,6 @@
       align-items:center;
     }
 
-    /* $200M Buttons: restrained, carved, not loud */
     a.btn{
       position:relative;
       display:inline-flex;
@@ -170,7 +157,7 @@
       transform: translate3d(0,0,0);
     }
 
-    /* Micro sheen (slow — “expensive”) */
+    /* Micro sheen with a whisper of purple */
     a.btn::after{
       content:"";
       position:absolute;
@@ -180,20 +167,33 @@
       height:180%;
       background: linear-gradient(120deg,
         transparent 0%,
-        rgba(233,236,243,.14) 28%,
-        rgba(233,236,243,.06) 42%,
+        rgba(233,236,243,.14) 26%,
+        rgba(208,188,255,.10) 36%,
+        rgba(233,236,243,.06) 46%,
         transparent 70%);
       transform: rotate(16deg);
-      opacity:.35;
+      opacity:.36;
       animation: sheen 6.4s ease-in-out infinite;
       pointer-events:none;
       mix-blend-mode: soft-light;
     }
     @keyframes sheen{
       0%   { left:-60%; opacity:.10; }
-      30%  { opacity:.38; }
+      30%  { opacity:.40; }
       55%  { opacity:.18; }
       100% { left:120%; opacity:.10; }
+    }
+
+    /* Ultra subtle brand halo on hover (purple40 at low alpha) */
+    a.btn::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius:999px;
+      background: radial-gradient(circle at 50% 50%, rgba(102,80,164,.18), transparent 70%);
+      opacity:0;
+      transition: opacity .25s ease;
+      pointer-events:none;
     }
 
     a.btn:hover{
@@ -203,6 +203,8 @@
         0 16px 46px rgba(0,0,0,.48),
         inset 0 1px 0 rgba(233,236,243,.08);
     }
+    a.btn:hover::before{ opacity:1; }
+
     a.btn:active{
       transform: translateY(0);
       box-shadow:
