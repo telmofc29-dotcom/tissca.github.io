@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TISSCA — Reset Password</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background:#1b1412; color:#f4eee9; }
+    .card { max-width: 520px; margin: 10vh auto; background:#2a1f1b; border-radius: 18px; padding: 28px; }
+    h1 { margin: 0 0 10px; font-size: 28px; }
+    p { margin: 10px 0; opacity: .9; line-height: 1.5; }
+    input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.18); background:#1f1714; color:#f4eee9; margin-top: 10px; }
+    button { margin-top: 14px; width:100%; padding: 12px 16px; border-radius: 999px; background:#ffb38f; color:#2a1f1b; font-weight: 700; border: 0; cursor:pointer; }
+    .muted { opacity:.75; font-size: 13px; margin-top: 14px; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="title">Preparing reset…</h1>
+    <p id="msg">Please wait.</p>
+
+    <div id="form" style="display:none;">
+      <input id="pw1" type="password" placeholder="New password" />
+      <input id="pw2" type="password" placeholder="Confirm new password" />
+      <button id="btn">Update password</button>
+    </div>
+
+    <div id="debug" class="muted"></div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://ovkpblbnnvnmsulrrnor.supabase.co";
+    const SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY_HERE";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const title = document.getElementById("title");
+    const msg = document.getElementById("msg");
+    const form = document.getElementById("form");
+    const pw1 = document.getElementById("pw1");
+    const pw2 = document.getElementById("pw2");
+    const btn = document.getElementById("btn");
+    const debug = document.getElementById("debug");
+
+    function showErr(text) {
+      title.textContent = "Reset failed";
+      msg.textContent = text;
+      debug.textContent = window.location.href;
+    }
+
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get("code");
+    const token_hash = url.searchParams.get("token_hash");
+    const type = url.searchParams.get("type"); // should be "recovery"
+
+    try {
+      // Establish a session from the link
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) throw error;
+      } else if (token_hash && type) {
+        const { error } = await supabase.auth.verifyOtp({ token_hash, type });
+        if (error) throw error;
+      } else {
+        showErr("Missing reset parameters in the link.");
+        throw new Error("Missing params");
+      }
+
+      title.textContent = "Reset your password";
+      msg.textContent = "Enter a new password below.";
+      form.style.display = "block";
+
+      btn.addEventListener("click", async () => {
+        const a = pw1.value.trim();
+        const b = pw2.value.trim();
+        if (!a || a.length < 8) return showErr("Password must be at least 8 characters.");
+        if (a !== b) return showErr("Passwords do not match.");
+
+        const { error } = await supabase.auth.updateUser({ password: a });
+        if (error) return showErr(error.message);
+
+        title.textContent = "Password updated";
+        msg.textContent = "All done — you can go back to the app and sign in.";
+        form.style.display = "none";
+      });
+
+    } catch (e) {
+      if (e?.message !== "Missing params") showErr(e?.message || "Unknown error.");
+    }
+  </script>
+</body>
+</html>
