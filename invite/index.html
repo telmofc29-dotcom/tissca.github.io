@@ -1,33 +1,149 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>TISSCA</title>
-    <style>
-      body { font-family: Arial, Helvetica, sans-serif; margin: 0; background: #f5f7fb; }
-      .wrap { max-width: 720px; margin: 0 auto; padding: 48px 18px; }
-      .card { background: #fff; border-radius: 16px; padding: 26px; box-shadow: 0 10px 30px rgba(16,24,40,.08); }
-      a.btn { display: inline-block; background: #1f4bff; color: #fff; text-decoration: none; padding: 12px 16px; border-radius: 12px; font-weight: 700; }
-      .muted { color: #667085; margin-top: 10px; line-height: 1.4; }
-      .code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono"; background: #eef2ff; padding: 2px 6px; border-radius: 8px; }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <div class="card">
-        <h1 style="margin:0 0 10px 0;">TISSCA</h1>
-        <p class="muted" style="margin:0 0 18px 0;">
-          If you opened an invite link on a phone and the app didn’t open, install the app and try again.
-        </p>
-        <p style="margin:0 0 18px 0;">
-          Invite links look like: <span class="code">https://tissca.com/invite/&lt;inviteId&gt;</span>
-        </p>
-        <a class="btn" href="https://play.google.com/store" target="_blank" rel="noopener">Get the app</a>
-        <p class="muted">
-          (This page is temporary while we finish the full website.)
-        </p>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <meta name="format-detection" content="telephone=no,address=no,email=no" />
+  <title>TISSCA — Invitation</title>
+
+  <style>
+    :root {
+      --bg: #1b1412;
+      --card: #2a1f1b;
+      --text: #f4eee9;
+      --muted: rgba(244,238,233,.75);
+      --accent: #ffb38f;
+      --accentText: #2a1f1b;
+      --border: rgba(255,255,255,.08);
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap {
+      padding: 24px;
+    }
+
+    .card {
+      max-width: 600px;
+      margin: 12vh auto;
+      background: var(--card);
+      border-radius: 22px;
+      padding: 36px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      margin: 0 0 12px 0;
+      font-size: 30px;
+      letter-spacing: -0.4px;
+    }
+
+    p {
+      margin: 12px 0;
+      line-height: 1.6;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .code {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas;
+      background: rgba(255,255,255,.06);
+      padding: 6px 10px;
+      border-radius: 10px;
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .row {
+      margin-top: 26px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    a.btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 20px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: var(--accentText);
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: .2px;
+      min-width: 200px;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    a.btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255,179,143,.35);
+    }
+
+    a.secondary {
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .footer {
+      margin-top: 24px;
+      font-size: 12px;
+      color: rgba(255,255,255,.5);
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 28px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>You're invited to TISSCA</h1>
+
+      <p>
+        If you opened an invitation link on your phone and the app didn’t launch automatically,
+        please install the app and then open the link again.
+      </p>
+
+      <p>
+        Invitation links look like:
+      </p>
+
+      <div class="code">
+        https://tissca.com/invite/&lt;inviteId&gt;
+      </div>
+
+      <div class="row">
+        <a class="btn" href="https://play.google.com/store" target="_blank" rel="noopener">
+          Download for Android
+        </a>
+
+        <a class="btn secondary" href="https://tissca.com">
+          Visit website
+        </a>
+      </div>
+
+      <div class="footer">
+        TISSCA — Professional workspace management for modern teams.
       </div>
     </div>
-  </body>
+  </div>
+</body>
 </html>
