@@ -308,8 +308,20 @@
     const primary = document.getElementById("primaryCta");
     const secondary = document.getElementById("secondaryCta");
     const desc = document.getElementById("desc");
+    const example = document.getElementById("example");
 
-    const deepLink = "tissca://auth/callback";
+    // ✅ Extract inviteId from /invite/<inviteId>
+    const path = window.location.pathname || "";
+    const parts = path.split("/").filter(Boolean);
+    const inviteId = (parts.length >= 2 && parts[0] === "invite") ? parts[1] : null;
+
+    // ✅ Deep link should include inviteId so the app can open the correct invitation
+    const deepLink = inviteId ? `tissca://invite/${inviteId}` : "tissca://invite/";
+
+    // Update example to show the actual link (if we have it)
+    if (inviteId) {
+      example.textContent = `https://tissca.com/invite/${inviteId}`;
+    }
 
     if (isAndroid) {
       primary.textContent = "Download for Android";
