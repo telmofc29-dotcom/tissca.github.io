@@ -5,24 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="x-apple-disable-message-reformatting" />
   <meta name="format-detection" content="telephone=no,address=no,email=no" />
-  <title>TISSCA — Email Verified</title>
+  <title>TISSCA — Verified</title>
 
   <style>
     :root{
       --blue:#2d4152;
       --gold1:#CBB26B;
-      --gold2:#be9e43;
-      --goldDeep:#9a7f35;
-      --goldDark:#746028;
-      --white:#ffffff;
-
       --bg:#0b141b;
       --bg2:#0e1a23;
-
       --card:rgba(16,28,38,.78);
       --text:rgba(255,255,255,.92);
       --muted:rgba(255,255,255,.70);
-
       --border:rgba(255,255,255,.12);
       --danger:#ffb4b4;
     }
@@ -149,11 +142,6 @@
     .err{margin-top:12px;color:var(--danger);font-size:13px;line-height:1.45;display:none;}
     .debug{display:none;margin-top:12px;font-size:12px;color:rgba(255,255,255,.50);word-break:break-all;}
     .footer{margin-top:14px;font-size:12px;color:rgba(255,255,255,.50);}
-
-    @media (prefers-reduced-motion: reduce){
-      .ambient,.noise,a.btn::after{animation:none}
-      a.btn{transition:none}
-    }
   </style>
 </head>
 
@@ -163,8 +151,8 @@
 
   <div class="wrap">
     <div class="card">
-      <h1 id="title">Verifying…</h1>
-      <p id="msg">Please wait while we confirm your email.</p>
+      <h1 id="title">Working…</h1>
+      <p id="msg">Please wait while we confirm your request.</p>
 
       <div class="row" id="actions" style="display:none;">
         <a class="btn primary" href="tissca://auth/callback">Open the app</a>
@@ -174,7 +162,7 @@
       <div id="err" class="err"></div>
       <div id="debug" class="debug"></div>
 
-      <div class="footer">TISSCA — secure account verification</div>
+      <div class="footer">TISSCA — secure verification</div>
     </div>
   </div>
 
@@ -193,20 +181,33 @@
     const debug = document.getElementById("debug");
 
     function setError(text, showDebug = false) {
-      title.textContent = "Verification failed";
-      msg.textContent = "We couldn’t confirm your email.";
+      title.textContent = "Something went wrong";
+      msg.textContent = "We couldn’t complete this request.";
       errBox.style.display = "block";
       errBox.textContent = text;
-
       if (showDebug) {
         debug.style.display = "block";
         debug.textContent = window.location.href;
       }
     }
 
-    function setSuccess() {
-      title.textContent = "Email verified";
-      msg.textContent = "Thank you — your email has been verified. You can now return to the app and sign in.";
+    function setSuccess(type) {
+      const t = (type || "signup").toLowerCase();
+
+      if (t === "email_change") {
+        title.textContent = "Email confirmed";
+        msg.textContent = "Your email address has been updated. You can now return to the app and sign in using your new email.";
+      } else if (t === "magiclink") {
+        title.textContent = "Signed in";
+        msg.textContent = "You’re signed in securely. You can now return to the app.";
+      } else if (t === "invite") {
+        title.textContent = "Invitation accepted";
+        msg.textContent = "Thanks — your invitation has been accepted. You can now open the app.";
+      } else {
+        title.textContent = "Email verified";
+        msg.textContent = "Thank you — your email has been verified. You can now return to the app and sign in.";
+      }
+
       actions.style.display = "flex";
     }
 
@@ -217,54 +218,40 @@
       const hash = (window.location.hash || "").replace(/^#/, "");
       const h = new URLSearchParams(hash);
 
+      const tokenFromQuery = q.get("token") || null;
+      const tokenHashFromQuery = q.get("token_hash") || null;
+
       return {
-        // Query params
         code: q.get("code") || null,
-        type: q.get("type") || null,
-
-        // Raw-token flow (common in email templates)
-        token: q.get("token") || null,
         email: q.get("email") || null,
+        type: q.get("type") || null,
+        token_hash: tokenHashFromQuery || tokenFromQuery || null,
 
-        // Hash-token flow
-        token_hash: q.get("token_hash") || null,
-
-        // Hash params (alternative flows)
         access_token: h.get("access_token") || null,
-        refresh_token: h.get("refresh_token") || null,
-        hash_type: h.get("type") || null,
+        refresh_token: h.get("refresh_token") || null
       };
     }
 
     async function establishSessionFromLink(p) {
-      // 1) PKCE/code flow
       if (p.code) {
         const { error } = await supabase.auth.exchangeCodeForSession(p.code);
         if (error) throw error;
         return;
       }
 
-      // 2) token_hash flow
       if (p.token_hash) {
-        const t = p.type || "signup";
-        const { error } = await supabase.auth.verifyOtp({ token_hash: p.token_hash, type: t });
+        const payload = { token_hash: p.token_hash, type: (p.type || "signup") };
+        if (p.email) payload.email = p.email;
+
+        const { error } = await supabase.auth.verifyOtp(payload);
         if (error) throw error;
         return;
       }
 
-      // 3) token + email flow  ✅ THIS IS THE KEY FIX
-      if (p.token && p.email) {
-        const t = p.type || "signup";
-        const { error } = await supabase.auth.verifyOtp({ token: p.token, email: p.email, type: t });
-        if (error) throw error;
-        return;
-      }
-
-      // 4) access_token hash flow
       if (p.access_token && p.refresh_token) {
         const { error } = await supabase.auth.setSession({
           access_token: p.access_token,
-          refresh_token: p.refresh_token,
+          refresh_token: p.refresh_token
         });
         if (error) throw error;
         return;
@@ -277,7 +264,7 @@
       try {
         const p = parseParams();
         await establishSessionFromLink(p);
-        setSuccess();
+        setSuccess(p.type);
       } catch (e) {
         setError(e?.message || "Unknown error.", true);
       }
