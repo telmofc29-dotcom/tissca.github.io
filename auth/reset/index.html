@@ -212,11 +212,6 @@
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-    // ===============================================================
-    // ✅ CONFIG (ONE PLACE ONLY — NO DUPLICATES)
-    // Supabase Dashboard → Project Settings → API
-    // Copy: "anon public" key
-    // ===============================================================
     const SUPABASE_URL = "https://ovkpblbnnvnmsulrrnor.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_hHm8j6LDzX02VYbayMaZZw_8n_E901Y";
 
@@ -249,7 +244,6 @@
       title.textContent = "Password updated";
       msg.textContent = "All done — you can now go back to the app and sign in.";
       form.style.display = "none";
-
       openApp.style.display = "inline-flex";
     }
 
@@ -260,18 +254,17 @@
       const hash = (window.location.hash || "").replace(/^#/, "");
       const h = new URLSearchParams(hash);
 
-      // ✅ Supabase reset links often provide `token` + `email` (not `token_hash`).
-      // We map token -> token_hash so verifyOtp works reliably.
-      const tokenFromQuery = q.get("token") || null;
-      const tokenHashFromQuery = q.get("token_hash") || null;
-
       return {
         // Query params
         code: q.get("code") || null,
-        email: q.get("email") || null,
         type: q.get("type") || null,
-        token: tokenFromQuery,
-        token_hash: tokenHashFromQuery || tokenFromQuery || null,
+
+        // Raw-token flow (common in email templates)
+        token: q.get("token") || null,
+        email: q.get("email") || null,
+
+        // Hash-token flow
+        token_hash: q.get("token_hash") || null,
 
         // Hash params (alternative flows)
         access_token: h.get("access_token") || null,
@@ -281,24 +274,30 @@
     }
 
     async function establishSessionFromLink(p) {
+      // 1) PKCE/code flow
       if (p.code) {
         const { error } = await supabase.auth.exchangeCodeForSession(p.code);
         if (error) throw error;
         return;
       }
 
+      // 2) token_hash flow
       if (p.token_hash) {
         const t = p.type || "recovery";
-
-        // ✅ Include email when present (some flows expect it).
-        const payload = { token_hash: p.token_hash, type: t };
-        if (p.email) payload.email = p.email;
-
-        const { error } = await supabase.auth.verifyOtp(payload);
+        const { error } = await supabase.auth.verifyOtp({ token_hash: p.token_hash, type: t });
         if (error) throw error;
         return;
       }
 
+      // 3) token + email flow ✅ KEY FIX
+      if (p.token && p.email) {
+        const t = p.type || "recovery";
+        const { error } = await supabase.auth.verifyOtp({ token: p.token, email: p.email, type: t });
+        if (error) throw error;
+        return;
+      }
+
+      // 4) access_token hash flow
       if (p.access_token && p.refresh_token) {
         const { error } = await supabase.auth.setSession({
           access_token: p.access_token,
