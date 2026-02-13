@@ -260,11 +260,20 @@
       const hash = (window.location.hash || "").replace(/^#/, "");
       const h = new URLSearchParams(hash);
 
-      return {
-        code: q.get("code") || null,
-        token_hash: q.get("token_hash") || null,
-        type: q.get("type") || null,
+      // ✅ Supabase reset links often provide `token` + `email` (not `token_hash`).
+      // We map token -> token_hash so verifyOtp works reliably.
+      const tokenFromQuery = q.get("token") || null;
+      const tokenHashFromQuery = q.get("token_hash") || null;
 
+      return {
+        // Query params
+        code: q.get("code") || null,
+        email: q.get("email") || null,
+        type: q.get("type") || null,
+        token: tokenFromQuery,
+        token_hash: tokenHashFromQuery || tokenFromQuery || null,
+
+        // Hash params (alternative flows)
         access_token: h.get("access_token") || null,
         refresh_token: h.get("refresh_token") || null,
         hash_type: h.get("type") || null,
@@ -280,7 +289,12 @@
 
       if (p.token_hash) {
         const t = p.type || "recovery";
-        const { error } = await supabase.auth.verifyOtp({ token_hash: p.token_hash, type: t });
+
+        // ✅ Include email when present (some flows expect it).
+        const payload = { token_hash: p.token_hash, type: t };
+        if (p.email) payload.email = p.email;
+
+        const { error } = await supabase.auth.verifyOtp(payload);
         if (error) throw error;
         return;
       }
