@@ -191,8 +191,29 @@
       }
     }
 
+    function normaliseType(input) {
+      const t = (input || "signup").toLowerCase().trim();
+
+      // Map your template-friendly names → Supabase expected types
+      if (t === "reset") return "recovery";
+      if (t === "recovery") return "recovery";
+
+      if (t === "magic") return "magiclink";
+      if (t === "magiclink") return "magiclink";
+
+      if (t === "change_email") return "email_change";
+      if (t === "email_change") return "email_change";
+      if (t === "email_change" || t === "emailchange") return "email_change";
+
+      if (t === "invite") return "invite";
+      if (t === "signup") return "signup";
+
+      // Default safe
+      return "signup";
+    }
+
     function setSuccess(type) {
-      const t = (type || "signup").toLowerCase();
+      const t = normaliseType(type);
 
       if (t === "email_change") {
         title.textContent = "Email confirmed";
@@ -223,10 +244,10 @@
 
       return {
         code: q.get("code") || null,
-        email: q.get("email") || null,
         type: q.get("type") || null,
         token_hash: tokenHashFromQuery || tokenFromQuery || null,
 
+        // Hash params (some flows)
         access_token: h.get("access_token") || null,
         refresh_token: h.get("refresh_token") || null
       };
@@ -240,10 +261,10 @@
       }
 
       if (p.token_hash) {
-        const payload = { token_hash: p.token_hash, type: (p.type || "signup") };
-        if (p.email) payload.email = p.email;
-
-        const { error } = await supabase.auth.verifyOtp(payload);
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: p.token_hash,
+          type: normaliseType(p.type)
+        });
         if (error) throw error;
         return;
       }
