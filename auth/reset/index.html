@@ -227,10 +227,10 @@
     const errBox = document.getElementById("err");
     const debug = document.getElementById("debug");
 
-    function setError(text, showDebug = false) {
+    function setError(text, showDebugFlag = false) {
       errBox.style.display = "block";
       errBox.textContent = text;
-      if (showDebug) {
+      if (showDebugFlag) {
         debug.style.display = "block";
         debug.textContent = window.location.href;
       }
@@ -247,6 +247,13 @@
       openApp.style.display = "inline-flex";
     }
 
+    function normaliseType(input) {
+      const t = (input || "recovery").toLowerCase().trim();
+      if (t === "reset") return "recovery";     // 👈 key fix for your templates
+      if (t === "recovery") return "recovery";
+      return "recovery"; // reset page should always be recovery
+    }
+
     function parseParams() {
       const url = new URL(window.location.href);
       const q = url.searchParams;
@@ -255,21 +262,19 @@
       const h = new URLSearchParams(hash);
 
       return {
-        // Query params
         code: q.get("code") || null,
         type: q.get("type") || null,
 
-        // Raw-token flow (common in email templates)
+        // Raw-token flow
         token: q.get("token") || null,
         email: q.get("email") || null,
 
-        // Hash-token flow
+        // token_hash flow
         token_hash: q.get("token_hash") || null,
 
-        // Hash params (alternative flows)
+        // Hash session flow
         access_token: h.get("access_token") || null,
-        refresh_token: h.get("refresh_token") || null,
-        hash_type: h.get("type") || null,
+        refresh_token: h.get("refresh_token") || null
       };
     }
 
@@ -281,18 +286,23 @@
         return;
       }
 
-      // 2) token_hash flow
+      // 2) token_hash flow (STRICT: only token_hash + type)
       if (p.token_hash) {
-        const t = p.type || "recovery";
-        const { error } = await supabase.auth.verifyOtp({ token_hash: p.token_hash, type: t });
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: p.token_hash,
+          type: normaliseType(p.type)
+        });
         if (error) throw error;
         return;
       }
 
-      // 3) token + email flow ✅ KEY FIX
+      // 3) token + email flow (older template style)
       if (p.token && p.email) {
-        const t = p.type || "recovery";
-        const { error } = await supabase.auth.verifyOtp({ token: p.token, email: p.email, type: t });
+        const { error } = await supabase.auth.verifyOtp({
+          token: p.token,
+          email: p.email,
+          type: normaliseType(p.type)
+        });
         if (error) throw error;
         return;
       }
@@ -301,7 +311,7 @@
       if (p.access_token && p.refresh_token) {
         const { error } = await supabase.auth.setSession({
           access_token: p.access_token,
-          refresh_token: p.refresh_token,
+          refresh_token: p.refresh_token
         });
         if (error) throw error;
         return;
